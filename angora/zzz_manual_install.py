@@ -4,7 +4,6 @@
 """
 Install your own package in one seconds! (For Windows, MacOS, Linux system)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 Put this script in your package directory, for example::
 
     |---mypackage
@@ -50,9 +49,9 @@ setup.py and build the distribution by yourself. Read the following instruction:
 
 **Warning**: with python2, the project directory cannot have non-ascil char.
 
-一键安装你的自定义库! (For Windows, MacOS, Linux System)
--------------------------------------------------------------------------------
 
+一键安装你的自定义库! (For Windows, MacOS, Linux System)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 本脚用于在一键安装用户自己写的扩展包, 纯python实现。
 
 例如你有一个扩展包叫 mypackage, 文件目录形如: ``C:\project\mypackage``
@@ -93,9 +92,9 @@ package的安装包。这一部分可以参考:
 
 注: 项目目录在python2中不允许有中文路径。
 
+
 About
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 **Copyright (c) 2015 by Sanhe Hu**
 
 - Author: Sanhe Hu
@@ -112,6 +111,7 @@ About
 **Prerequisites**
 
 - None
+
 
 Class, method, function, exception
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
