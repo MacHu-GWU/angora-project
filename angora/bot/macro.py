@@ -26,7 +26,8 @@ try:
     from pymouse import PyMouse
     from pykeyboard import PyKeyboard
 except ImportError as e:
-    print("[Failed to do 'from pymouse import PyMouse']")
+    print("[Failed to do 'from pymouse import PyMouse', "
+          "please install PyUserInput]: %s" % e)
 import time
 
 class Bot():

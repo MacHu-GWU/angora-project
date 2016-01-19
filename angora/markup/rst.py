@@ -2,16 +2,45 @@
 # -*- coding: utf-8 -*-
 
 """
+Copyright (c) 2015 by Sanhe Hu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Author: Sanhe Hu
+- Email: husanhe@gmail.com
+- Lisence: MIT
+
+
+Module description
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+A tool can programmatically generate reConstructed Text snippet.
+
 ref: Quick reStructuredText, 
   http://docutils.sourceforge.net/docs/user/rst/quickref.html
+
+
+Compatibility
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Python2: Yes
+- Python3: Yes
+
+
+Prerequisites
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- None
+
+
+Class, method, function, exception
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
+from __future__ import unicode_literals
 try: # ResConstructor.table method requires 'prettytable' extension.
     from prettytable import PrettyTable
 except ImportError:
     pass
 
 class RstConstructor(object):
+    """reConstructed Text snippet constructor.
+    """
     def header(self, title, level, key, width=80):
         """Example::
         

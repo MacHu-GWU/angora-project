@@ -37,11 +37,13 @@ from __future__ import print_function
 try:
     import requests
 except ImportError as e:
-    print("[Failed to do 'import requests']: %s" % e)
+    print("[Failed to do 'import requests', "
+          "please install requests]: %s" % e)
 try:
     import chardet
 except ImportError as e:
-    print("[Failed to do 'import chardet']: %s" % e)
+    print("[Failed to do 'import chardet', "
+          "please install chardet]: %s" % e)
 import time
 
 class SmartDecoder(object):

@@ -55,13 +55,13 @@ from datetime import datetime
 import os
 
 GITHUB_ACCOUNT = "MacHu-GWU" # your GitHub account name
-RELEASE_TAG = "2015-12-24" # the GitHub release tag
+RELEASE_TAG = "2016-01-19" # the GitHub release tag
 NAME = "angora" # name your package
 
 VERSION = __import__(NAME).__version__
 PACKAGES = [NAME] + ["%s.%s" % (NAME, i) for i in find_packages(NAME)]
 PACKAGE_DATA = {
-    "uszipcode": ["data/zipcode.sqlite3"],
+    "": ["*.*"],
 }
 SHORT_DESCRIPTION = __import__(NAME).__short_description__ # GitHub Short Description
 AUTHOR = "Sanhe Hu"
@@ -74,7 +74,7 @@ URL = "https://github.com/{0}/{1}".format(GITHUB_ACCOUNT, PROJECT_NAME)
 DOWNLOAD_URL = "https://github.com/{0}/{1}/tarball/{2}".format(
     GITHUB_ACCOUNT, PROJECT_NAME, RELEASE_TAG)
 
-with open("long_description.rst", "rb") as f:
+with open("readme.rst", "rb") as f:
     LONG_DESCRIPTION = f.read().decode("utf-8")
 LICENSE = "MIT"
 

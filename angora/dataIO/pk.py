@@ -120,7 +120,7 @@ def load_pk(abspath, compress=False, enable_verbose=True):
             obj = pickle.load(f)
         
     if enable_verbose:
-        print("\tComplete! Elapse %s sec." % (time.clock() - st) )
+        print("\tComplete! Elapse %.6f sec" % (time.clock() - st) )
         
     return obj
 
@@ -234,7 +234,7 @@ def dump_pk(obj, abspath,
                 pickle.dump(obj, f, protocol=pk_protocol)
         
     if enable_verbose:
-        print("\tComplete! Elapse %s sec" % (time.clock() - st) )
+        print("\tComplete! Elapse %.6f sec" % (time.clock() - st) )
 
 def safe_dump_pk(obj, abspath, pk_protocol=pk_protocol, compress=False,
                  enable_verbose=True):

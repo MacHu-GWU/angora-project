@@ -40,7 +40,8 @@ Class, method, function, exception
 try:
     import numpy as np
 except ImportError as e:
-    print("[Failed to do 'import numpy']: %s" % e)
+    print("[Failed to do 'import numpy', "
+          "please install numpy]: %s" % e)
 
 def std_filter(array, n_std=2.0, return_index=False):
     """Standard deviation outlier detector.
@@ -82,8 +83,6 @@ def box_filter(array, n_iqr=1.5, return_index=False):
         return good_index[0], bad_index[0]
     else:
         return array[good_index], array[bad_index]
-
-   
 
 if __name__ == "__main__":
     import unittest

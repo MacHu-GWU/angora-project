@@ -4,7 +4,8 @@
 try:
     import requests
 except ImportError as e:
-    print("[Failed to do 'import requests']: %s" % e)
+    print("[Failed to do 'import requests', "
+          "please install requests]: %s" % e)
 import datetime
 import time
 import sys

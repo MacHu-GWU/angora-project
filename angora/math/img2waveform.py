@@ -32,8 +32,13 @@ from __future__ import print_function
 try:
     from PIL import Image
 except ImportError as e:
-    pass
-import numpy as np
+    print("[Failed to do 'from PIL import Image', "
+          "pleasee install pillow]: %s" % e)
+try:
+    import numpy as np
+except ImportError as e:
+    print("[Failed to do 'import numpy', "
+          "please install numpy]: %s" % e)
 
 def expand_window(center, window_size, array_size):
     """Generate a bounded windows. 

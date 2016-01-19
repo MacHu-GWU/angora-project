@@ -92,7 +92,8 @@ from __future__ import print_function
 try:
     from scipy.interpolate import interp1d
 except ImportError as e:
-    print("[Failed to do 'from scipy.interpolate import interp1d']: %s" % e)
+    print("[Failed to do 'from scipy.interpolate import interp1d', "
+          "please install scipy]: %s" % e)
 from datetime import datetime, timedelta
 
 ##############################
@@ -297,7 +298,6 @@ def spline_interpolate_by_datetime(datetime_axis, y_axis, datetime_new_axis):
 #-----------------------------------------------------------------------------#
 #                                  Unittest                                   #
 #-----------------------------------------------------------------------------#
-
 if __name__ == "__main__":
     import numpy as np, pandas as pd
     import matplotlib.pyplot as plt
