@@ -15,7 +15,7 @@
 # from .timelib import *
 # from .visual import *
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __author__ = "Sanhe Hu"
 __license__ = "MIT"
 __short_description__ = "Sanhe's Data Science toolkits"
