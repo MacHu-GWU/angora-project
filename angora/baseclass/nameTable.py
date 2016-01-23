@@ -72,7 +72,10 @@ class Base(object):
                 if not inspect.ismethod(value):
                     class_attributes.append(key)
         return class_attributes
-
+    
+    def class_attributes(self):
+        return self.__class_attributes__()
+    
     def keys(self):
         """Return all class attributes.
         """
@@ -132,9 +135,9 @@ class Base(object):
 if __name__ == "__main__":
     import unittest
 
-    from angora.baseclass import namespace
+    from angora.baseclass import nameddict
 
-    class Person(namespace.Base):
+    class Person(nameddict.Base):
         def __init__(self, id, name):
             self.id = id
             self.name = name
@@ -146,6 +149,7 @@ if __name__ == "__main__":
         Jack = Person(id=1, name="Jack")
         Tom = Person(id=2, name="Tom")
 
+    
     class Unittest(unittest.TestCase):
         def test_all(self):
             for person_namespace in [
@@ -173,7 +177,7 @@ if __name__ == "__main__":
                     person_namespace.items(),
                     [("Jack", Person(id=1, name="Jack")), ("Tom", Person(id=2, name="Tom"))],
                 )
-
+                
                 self.assertDictEqual(
                     person_namespace.to_dict(),
                     {"Jack": {"id": 1, "name": "Jack"}, "Tom": {"id": 2, "name": "Tom"}},

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 # from .algorithm import *
-# from .backup import *
 # from .crawler import *
 # from .dataIO import *
 # from .dtypes import *
@@ -18,4 +17,4 @@
 __version__ = "0.0.2"
 __author__ = "Sanhe Hu"
 __license__ = "MIT"
-__short_description__ = "Sanhe's Data Science toolkits"
+__short_description__ = "Sanhe's Data Science/Python Dev toolkits"

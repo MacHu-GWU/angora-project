@@ -11,7 +11,7 @@ Copyright (c) 2015 by Sanhe Hu
 
 Module description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-A Python code, comment, docstr line counter utility.
+A Python code, comment, docstr line analysis utility.
 
 
 Compatibility
@@ -33,6 +33,11 @@ from __future__ import print_function
 import re
 import os
 
+try:
+    from ..filesystem import *
+except:
+    from angora.filesystem import *
+
 class CodeStats(object):
     """A simple Python project code, comment, docstr line counter.
     
@@ -46,13 +51,15 @@ class CodeStats(object):
     
     Usage example::
 
-        >>> from weatherlab.lib.gadget import *
-        >>> counter = CodeStats(workspace=r"C:\myproject", language="Python")
-        >>> counter.run()
-        code line: xxx
-        comment line: xxx
-        docstr line: xxx
-        purecode line: xxx
+        >>> from angora.gadget import CodeStats
+        >>> analyzer = CodeStats(workspace=r"C:\Python33\lib\site-packages\requests")
+        >>> analyzer.run()
+        Code statistic result for 'C:\Python33\lib\site-packages\requests'
+          79 'Python' files, 80 other files.
+            code line: 12362
+            comment line: 2025
+            docstr line: 1545
+            purecode line: 10817
         
     **中文文档**
     
@@ -66,23 +73,24 @@ class CodeStats(object):
     
     用例::
         
-        >>> from weatherlab.lib.gadget import *
-        >>> counter = CodeStats(workspace=r"C:\myproject", language="Python")
-        >>> counter.run()
-        code line: xxx
-        comment line: xxx
-        docstr line: xxx
-        purecode line: xxx
-        
+        >>> from angora.gadget import CodeStats
+        >>> analyzer = CodeStats(workspace=r"C:\Python33\lib\site-packages\requests")
+        >>> analyzer.run()
+        Code statistic result for 'C:\Python33\lib\site-packages\requests'
+          79 'Python' files, 80 other files.
+            code line: 12362
+            comment line: 2025
+            docstr line: 1545
+            purecode line: 10817        
     """
-    _ext = {
-        "python": ".py"
-    }
-    def __init__(self, workspace, language="Python"):
+    def __init__(self, workspace, ignore=list()):
         if not os.path.exists(workspace):
-            raise FileNotFoundError("%s doesn't exists!" % workspace)
-        self.dir = os.path.abspath(workspace)
-        self.ext = self._ext[language.lower()]
+            raise FileNotFoundError("%r doesn't exists!" % workspace)
+        self.workspace = os.path.abspath(workspace)
+        self.ignore = ignore
+        self.language = "Python"
+        self.analyzer = self.analyzePython
+        self.filter = self.filterPython
         
     def run(self):
         """Run analysis.
@@ -90,28 +98,50 @@ class CodeStats(object):
         The basic idea is to recursively find all script files in specific 
         programming language, and analyze each file then sum it up.
         """
-        code, comment, docstr = 0, 0, 0
+        n_target_file, n_other_file = 0, 0
         
-        for current_dir, _, filelist in os.walk(self.dir):
-            for basename in filelist:
-                _, ext = os.path.splitext(basename)
-                if ext == self.ext:
-                    abspath = os.path.join(current_dir, basename)
-                    with open(abspath, "rb") as f:
-                        code_text = f.read().decode("utf-8")
-                        res = self.analyze_python(code_text)
-                        code += res[0]
-                        comment += res[1]
-                        docstr += res[2]
-                        
-        purecode = code - docstr
-           
-        print("code line: %s" % code)
-        print("comment line: %s" % comment)
-        print("docstr line: %s" % docstr)
-        print("purecode line: %s" % purecode)
+        code, comment, docstr, purecode = 0, 0, 0, 0
         
-    def analyze_python(self, code_text):
+        fc = FileCollection.from_path_except(self.workspace, self.ignore)
+        
+        fc_yes, fc_no = fc.select(self.filter, keepboth=True)
+        n_other_file += len(fc_no)
+        
+        for abspath in fc_yes:
+            try:
+                with open(abspath, "rb") as f:
+                    code_text = f.read().decode("utf-8")
+                    code_, comment_, docstr_, purecode_ = self.analyzer(code_text)
+                    code += code_
+                    comment += comment_
+                    docstr += docstr_
+                    purecode += purecode_
+                    n_target_file += 1
+            except Exception as e:
+                n_other_file += 1
+        
+        lines = list()
+        lines.append("Code statistic result for '%s'" % self.workspace)
+        lines.append("  %r %r files, %r other files." % 
+            (n_target_file, self.language, n_other_file))
+        lines.append("    code line: %s" % code)
+        lines.append("    comment line: %s" % comment)
+        lines.append("    docstr line: %s" % docstr)
+        lines.append("    purecode line: %s" % purecode)
+        message = "\n".join(lines)
+        
+        print(message)
+        return message
+    
+    @staticmethod
+    def filterPython(winfile):
+        if winfile.ext == ".py":
+            return True
+        else:
+            return False
+    
+    @staticmethod
+    def analyzePython(code_text):
         """Count how many line of code, comment, dosstr, purecode in one 
         Python script file.
         """
@@ -135,10 +165,40 @@ class CodeStats(object):
                 code += 1
         purecode = code - docstr # pure code = code - docstr
         return code, comment, docstr, purecode
+    
+    def forPython(self):
+        self.filter = self.filterPython
+        self.analyzer = self.analyzePython
+        self.language = "Python"
         
+    @staticmethod
+    def filterText(winfile):
+        return True
+            
+    @staticmethod
+    def analyzeText(code_text):
+        code, commend, docstr = 0, 0, 0
+        code = code_text.count("\n") + 1
+        comment = 0
+        docstr = 0
+        purecode = code - docstr # pure code = code - docstr
+        return code, comment, docstr, purecode
+
+    def forText(self):
+        self.filter = self.filterText
+        self.analyzer = self.analyzeText
+        self.language = "Text"
+    
 if __name__ == "__main__":
     import site
     
     workspace = os.path.join(site.getsitepackages()[1], "angora")
-    counter = CodeStats(workspace)
-    counter.run()
+    
+    analyzer = CodeStats(workspace)
+    
+    analyzer.forPython()
+    analyzer.run()
+    
+    analyzer.forText()
+    analyzer.run()
+    

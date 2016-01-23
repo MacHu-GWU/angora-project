@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-def base(erroName=True):
+def declare_base(erroName=True):
     """Create a Exception with default message.
     
     :param errorName: boolean, True if you want the Exception name in the 
@@ -24,7 +24,7 @@ def base(erroName=True):
     return Base
 
 if __name__ == "__main__":
-    class DataError(base(erroName=False)):
+    class DataError(declare_base(erroName=False)):
         default = "This is DEFAULT message"
         
     try:

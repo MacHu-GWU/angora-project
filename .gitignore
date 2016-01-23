@@ -5,11 +5,13 @@
 # File
 *.pyc
 *.sqlite3
+*.log
+*.zip
 
 # Directory
 build
 dist
-source
+source/angora
 angora.egg-info
 
 # =========================

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-filesystem is a package you can use to manipulate with file system.
+filesystem is a package you can use to manipulate file system easier.
 """
 
 from .filesystem import (

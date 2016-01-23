@@ -1,4 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from .macro import Bot
+"""
+bot is a keyboard and mouse behavior simulator package.
+"""
+
+__all__ = ["anjian", "macro"]

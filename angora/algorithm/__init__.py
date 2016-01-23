@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+high performance algorithm implements.
+"""
+
 from .binarysearch import (find_index, find_lt, find_le, find_gt, find_ge,
     find_last_true, find_nearest,
 )

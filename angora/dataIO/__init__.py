@@ -4,7 +4,7 @@
 """
 This package includes some utility function of dataIO. Supported data format:
 
-- json
+- json (TODO, to support datetime and date encoder)
 - pickle
 - textfile
 """

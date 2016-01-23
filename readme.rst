@@ -1,7 +1,7 @@
 Welcome to the angora Documentation
 ===================================================================================================
 
-``angora`` is my personal data science python library collection.
+``angora`` is my personal data science python development library collection.
 
 **Quick links**:
 

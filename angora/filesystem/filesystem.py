@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """    
-Copyright (c) 2015 by Sanhe Hu
+Copyright (c) 2016 by Sanhe Hu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Author: Sanhe Hu
@@ -112,7 +112,7 @@ def md5file(abspath, nbytes=0):
                 m.update(data)
         else:
             while True:
-                data = f.read(1024 ** 2)
+                data = f.read(1 << 20)
                 if not data:
                     break
                 m.update(data)
@@ -159,6 +159,7 @@ class WinFile(object):
         "abspath", "dirname", "basename", "fname", "ext",
         "atime", "ctime", "mtime", "size_on_disk", "md5",        
     ]
+    init_mode = 2
     def __init__(self, abspath):
         if os.path.isfile(abspath): # 确保这是一个文件而不是目录
             self.abspath = os.path.abspath(abspath)
@@ -171,7 +172,48 @@ class WinFile(object):
         """Internal method. Initialize the value of some attributes.
         """
         self.level2_initialize()
-
+        
+    @staticmethod
+    def use_fast_init():
+        """Set initialization mode to level1_initialize
+        """
+        WinFile.initialize = WinFile.level1_initialize
+        WinFile.init_mode = 1
+        
+    @staticmethod
+    def use_regular_init():
+        """Set initialization mode to level2_initialize
+        """
+        WinFile.initialize = WinFile.level2_initialize
+        WinFile.init_mode = 2
+        
+    @staticmethod
+    def use_slow_init():
+        """Set initialization mode to level3_initialize
+        """
+        WinFile.initialize = WinFile.level3_initialize
+        WinFile.init_mode = 3
+        
+    @staticmethod
+    def set_initialize_mode(complexity=2):
+        """Set initialization mode. Default is slow mode.
+        
+        **中文文档**
+        
+        设置WinFile类的全局变量, 指定WinFile.initialize方法所绑定的初始化方式。
+        """
+        if complexity == 3:
+            WinFile.initialize = WinFile.level3_initialize
+            WinFile.init_mode = 3
+        elif complexity == 2:
+            WinFile.initialize = WinFile.level2_initialize
+            WinFile.init_mode = 2
+        elif complexity == 1:
+            WinFile.initialize = WinFile.level1_initialize
+            WinFile.init_mode = 1
+        else:
+            raise ValueError("complexity has to be 3, 2 or 1.")
+        
     def level3_initialize(self):
         """Load abspath, dirname, basename, fname, ext, atime, ctime, mtime,
         size_on_disk attributes in initialization.
@@ -199,7 +241,7 @@ class WinFile(object):
         self.atime = os.path.getatime(self.abspath) # 接触时间
         self.ctime = os.path.getctime(self.abspath) # 创建时间, 当文件被修改后不变
         self.mtime = os.path.getmtime(self.abspath) # 修改时间
-        self.md5 = md5file(self.abspath, nbytes=1024 ** 2) # 文件的哈希值
+        self.md5 = md5file(self.abspath, nbytes=1 << 20) # 文件的哈希值
         
     def level2_initialize(self):
         """Load abspath, dirname, basename, fname, ext, atime, ctime, mtime,
@@ -245,23 +287,6 @@ class WinFile(object):
         self.dirname, self.basename = os.path.split(self.abspath)
         self.fname, self.ext = os.path.splitext(self.basename)
         self.ext = self.ext.lower()
-        
-    @staticmethod
-    def set_initialize_mode(complexity=2):
-        """Set initialization mode. Default is slow mode.
-        
-        **中文文档**
-        
-        设置WinFile类的全局变量, 指定WinFile.initialize方法所绑定的初始化方式。
-        """
-        if complexity == 3:
-            WinFile.initialize = WinFile.level3_initialize
-        elif complexity == 2:
-            WinFile.initialize = WinFile.level2_initialize
-        elif complexity == 1:
-            WinFile.initialize = WinFile.level1_initialize
-        else:
-            raise ValueError("complexity has to be 3, 2 or 1.")
     
     def __str__(self):
         return self.abspath
@@ -450,7 +475,21 @@ class FileCollection(object):
     def __len__(self):
         return len(self.files)
     
+    def __getitem__(self, index):
+        """Get the ``index``th winfile. 
+        """
+        try:
+            return self.files[self.order[index]]
+        except:
+            index += 1
+            for winfile in self.iterfiles():
+                index -= 1                
+                if not index:
+                    return winfile
+    
     def __contains__(self, item):
+        """
+        """
         if isinstance(item, str): # abspath
             abspath = os.path.abspath(item)
         elif isinstance(item, WinFile): # WinFile
@@ -696,9 +735,7 @@ class FileCollection(object):
     def from_path_by_criterion(dir_path, criterion, keepboth=False):
         """Create a new FileCollection, and select some files from ``dir_path``.
         
-        How to construct your own criterion function:
-        
-        .. code-block:: python
+        How to construct your own criterion function::
         
             def filter_image(winfile):
                 if winfile.ext in [".jpg", ".png", ".bmp"]:
@@ -718,7 +755,8 @@ class FileCollection(object):
         
         **中文文档**
         
-        直接选取path目录下所有文件, 根据criterion中的规则, 生成FileCollection。
+        直接选取dir_path目录下所有文件, 根据criterion中的规则, 生成
+        FileCollection。
         """
         if keepboth:
             fc_yes, fc_no = FileCollection(), FileCollection()
@@ -734,7 +772,172 @@ class FileCollection(object):
                 if criterion(winfile):
                     fc.files.setdefault(winfile.abspath, winfile)
             return fc
+    
+    @staticmethod
+    def from_path_except(dir_path, 
+            ignore=list(), ignore_ext=list(), ignore_pattern=list()):
+        """Create a new FileCollection, and select all files except file
+        matching ignore-rule::
+            
+            dir_path = "your/path"
+            fc = FileCollection.from_path_except(
+                dir_path, ignore=["test"], ignore_ext=[".log", ".tmp"]
+                ignore_pattern=["some_pattern"])
         
+        :param dir_path: the root directory you want to start with
+        :param ignore: file or directory defined in this list will be ignored.
+        :param ignore_ext: file with extensions defined in this list will be ignored.
+        :param ignore_pattern: any file or directory that contains this pattern
+          will be ignored.
+          
+        **中文文档**
+        
+        选择dir_path下的所有文件, 在ignore中被排除的文件除外。
+        """
+        ignore = [i.lower() for i in ignore]
+        ignore_ext = [i.lower() for i in ignore_ext]
+        ignore_pattern = [i.lower() for i in ignore_pattern]
+        def filter(winfile):
+            relpath = os.path.relpath(winfile.abspath, dir_path).lower()
+            
+            # exclude ignore
+            for path in ignore:
+                if relpath.startswith(path):
+                    return False
+                
+            # exclude ignore extension
+            if winfile.ext in ignore_ext:
+                return False
+
+            # exclude ignore pattern
+            for pattern in ignore_pattern:
+                if pattern in relpath:
+                    return False
+            
+            return True
+        
+        return FileCollection.from_path_by_criterion(
+            dir_path, filter, keepboth=False)
+    
+    @staticmethod
+    def from_path_by_pattern(dir_path, pattern=list()):
+        """Create a new FileCollection, and select all files except file
+        matching ignore-rule::
+            
+            dir_path = "your/path"
+            fc = FileCollection.from_path_by_pattern(
+                dir_path, pattern=["log"])
+        
+        :param dir_path: the root directory you want to start with
+        :param pattern: any file or directory that contains this pattern
+          will be selected.
+          
+        **中文文档**
+        
+        选择dir_path下的所有文件的相对路径中包含有pattern的文件。
+        """
+        pattern = [i.lower() for i in pattern]
+        def filter(winfile):
+            relpath = os.path.relpath(winfile.abspath, dir_path).lower()
+            for p in pattern:
+                if p in relpath:
+                    return True
+            return False
+        
+        return FileCollection.from_path_by_criterion(
+            dir_path, filter, keepboth=False)
+        
+    @staticmethod
+    def from_path_by_size(dir_path, min_size=0, max_size=1 << 40):
+        """Create a new FileCollection, and select all files that size in
+        a range::
+            
+            dir_path = "your/path"
+            
+            # select by file size larger than 100MB
+            fc = FileCollection.from_path_by_size(
+                dir_path, min_size=100*1024*1024)
+            
+            # select by file size smaller than 100MB
+            fc = FileCollection.from_path_by_size(
+                dir_path, max_size=100*1024*1024)
+                
+            # select by file size from 1MB to 100MB
+            fc = FileCollection.from_path_by_size(
+                dir_path, min_size=1024*1024, max_size=100*1024*1024)
+        """
+        def filter(winfile):
+            if (winfile.size_on_disk >= min_size) and \
+                (winfile.size_on_disk <= max_size):
+                return True
+            else:
+                return False
+
+        return FileCollection.from_path_by_criterion(
+            dir_path, filter, keepboth=False)
+        
+    @staticmethod
+    def from_path_by_ext(dir_path, ext):
+        """Create a new FileCollection, and select all files that extension 
+        matching ``ext``::
+        
+            dir_path = "your/path"
+            
+            fc = FileCollection.from_path_by_ext(dir_path, ext=[".jpg", ".png"])
+        """
+        if isinstance(ext, (list, set, dict)): # collection of extension
+            def filter(winfile):
+                if winfile.ext in ext:
+                    return True
+                else:
+                    return False
+        else: # str
+            def filter(winfile):
+                if winfile.ext == ext:
+                    return True
+                else:
+                    return False
+
+        return FileCollection.from_path_by_criterion(
+            dir_path, filter, keepboth=False)
+
+    @staticmethod
+    def from_path_by_md5(md5_value, list_of_dir):
+        """Create a new FileCollection, and select all files' that md5 is 
+        matching.
+        
+        **中文文档**
+        
+        给定一个文件使用WinFile模块获得的md5值, 在list_of_dir中的文件里, 
+        找到与之相同的文件。
+        """       
+        def filter(winfile):
+            if winfile.md5 == md5_value:
+                return True
+            else:
+                return False
+        
+        if not isinstance(list_of_dir, (list, set)):
+            list_of_dir = [list_of_dir, ]        
+            
+        init_mode = WinFile.init_mode
+        WinFile.use_slow_init()
+        
+        fc = FileCollection()
+        for dir_path in list_of_dir:
+            for winfile in FileCollection.from_path_by_criterion(
+                    dir_path, filter, keepboth=False).iterfiles():
+                fc.files.setdefault(winfile.abspath, winfile)
+        
+        if init_mode == 1:
+            WinFile.use_fast_init()
+        elif init_mode == 2:
+            WinFile.use_regular_init()
+        elif init_mode == 3:
+            WinFile.use_slow_init()
+                
+        return fc
+
     def sort_by(self, attr_name, reverse=False):
         """Sort files by one of it's attributes.
         
@@ -870,6 +1073,19 @@ class FileCollection(object):
             fc.files.setdefault(winfile.abspath, winfile)
         return fc
     
+    @staticmethod
+    def sum(list_of_fc):
+        for fc in list_of_fc:
+            if not isinstance(fc, FileCollection):
+                raise TypeError("FileCollection.sum(list_of_fc) only take "
+                                "list of FileCollection")
+        
+        _fc = FileCollection()
+        for fc in list_of_fc:
+            for winfile in fc.iterfiles():
+                _fc.files.setdefault(winfile.abspath, winfile)
+        return _fc
+
     def __sub__(self, other_fc):
         if not isinstance(other_fc, FileCollection):
             raise TypeError(
@@ -883,56 +1099,67 @@ class FileCollection(object):
                 pass
         return fc
 
-    #################
-    # Useful recipe #
-    #################
-    def print_big_file(self, threshold):
+    #--- Useful recipe ---
+    @staticmethod
+    def show_big_file(dir_path, threshold):
         """Print all file path that file size greater and equal than 
         ``#threshold``.
         """
-        self._threshold = threshold
-        def bigfile_filter(winfile):
-            if winfile.size_on_disk >= self._threshold:
-                return True
-            else:
-                return False
-
-        fc = self.select(bigfile_filter)
+        fc = FileCollection.from_path_by_size(dir_path, min_size=threshold)
         fc.sort_by("size_on_disk")
         
-        print("Results:")
+        lines = list()
+        lines.append("Results:")
         for winfile in fc.iterfiles():
-            print("    %s - %s" % (string_SizeInBytes(winfile.size_on_disk), winfile))
-        print("Above are all files size greater than %s." % 
+            lines.append("  %s - %s" % 
+                         (string_SizeInBytes(winfile.size_on_disk), winfile))
+        lines.append("Above are files' size greater than %s." % 
               string_SizeInBytes(threshold))
-
-    def print_filename_contains_pattern(self, pattern, filename_only=True):
-        """Print all file that file name contains ``#text``
+        text = "\n".join(lines)
+        print(text)
+        with open("__show_big_file__.log", "wb") as f:
+            f.write(text.encode("utf-8"))
+    
+    @staticmethod
+    def show_patterned_file(dir_path, pattern=list(), filename_only=True):
+        """Print all file that file name contains ``pattern``
         """
-        self._pattern = pattern
-        self._filename_only = filename_only
-        def winfile_filter(winfile):
-            if self._filename_only:
-                if self._pattern in winfile.fname:
-                    return True
-                else:
-                    return False
-            else:
-                if self._pattern in winfile.abspath:
-                    return True
-                else:
-                    return False
-
-        fc = self.select(winfile_filter)
-        fc.sort_by("fname")
-        print("Results:")
+        pattern = [i.lower() for i in pattern]
+        if filename_only:
+            def filter(winfile):
+                for p in pattern:
+                    if p in winfile.fname.lower():
+                        return True
+                return False
+        else:
+            def filter(winfile):
+                for p in pattern:
+                    if p in winfile.abspath.lower():
+                        return True
+                return False
+        
+        fc = FileCollection.from_path_by_criterion(
+            dir_path, filter, keepboth=False)
+        if filename_only:
+            fc.sort_by("fname")
+        else:
+            fc.sort_by("abspath")
+            
+        table = {p: "<%s>" % p for p in pattern}
+        lines = list()
+        lines.append("Results:")
         for winfile in fc.iterfiles():
-            print("    %s" % winfile)
+            lines.append("  %s" % winfile)
             
         if filename_only:
-            print("Above are all files that fname contains `%s`" % pattern)
+            lines.append("Above are all files that file name contains %s" % pattern)
         else:
-            print("Above are all files that abspath contains `%s`" % pattern)
+            lines.append("Above are all files that abspath contains %s" % pattern)
+            
+        text = "\n".join(lines)
+        print(text)
+        with open("__show_patterned_file__.log", "wb") as f:
+            f.write(text.encode("utf-8"))
             
     @staticmethod
     def create_fake_mirror(src, dst):
@@ -963,22 +1190,6 @@ class FileCollection(object):
             with open(abspath, "w") as _:
                 pass
 
-    @staticmethod
-    def find_matched_file_by_md5(md5_value, list_of_dir):
-        """
-        
-        **中文文档**
-        
-        给定一个文件使用WinFile模块获得的md5值, 在list_of_dir中的文件里, 
-        找到与之相同的文件。
-        """
-        WinFile.set_initialize_mode(complexity=3)
-        fc = FileCollection.from_path(list_of_dir)
-        res = list()
-        for winfile in fc.iterfiles():
-            if winfile.md5 == md5_value:
-                res.append(winfile)
-        return res
     
 class FileFilter(object):
     """filter function container class.
@@ -994,8 +1205,8 @@ class FileFilter(object):
     @staticmethod
     def video(winfile):
         if winfile.ext in [".avi", ".wmv", ".mkv", ".mp4", ".flv", 
-                           ".vob", ".mov", ".rm", ".rmvb",
-                           ".3gp", ".3g2", ".nsv", ".webm"]:
+                ".vob", ".mov", ".rm", ".rmvb", "3gp", ".3g2", ".nsv", ".webm",
+                ".mpg", ".m4v", ".iso",]:
             return True
         else:
             return False
@@ -1095,15 +1306,15 @@ if __name__ == "__main__":
 #             print("{:=^100}".format("yield_all_file_path"))
 #             for abspath in FileCollection.yield_all_file_path(self._dir):
 #                 print(abspath)
-#              
+#               
 #             print("{:=^100}".format("yield_all_winfile"))
 #             for winfile in FileCollection.yield_all_winfile(self._dir):
 #                 print(repr(winfile))
-#              
+#               
 #             print("{:=^100}".format("yield_all_top_file_path"))
 #             for abspath in FileCollection.yield_all_top_file_path(self._dir):
 #                 print(abspath)
-#              
+#               
 #             print("{:=^100}".format("yield_all_top_winfile"))
 #             for winfile in FileCollection.yield_all_top_winfile(self._dir):
 #                 print(repr(winfile))
@@ -1133,6 +1344,71 @@ if __name__ == "__main__":
             for winfile, basename in zip(fc_no.iterfiles(), expect_no):
                 self.assertEqual(winfile.basename, basename)
         
+        def test_from_path_except(self):
+            """测试from_path_except方法是否能正常工作。
+            """
+            fc = FileCollection.from_path_except(
+                "testdir", ignore=["subfolder"])
+            expect = ["root_file.txt", "root_image.jpg"]
+            for winfile, basename in zip(fc.iterfiles(), expect):
+                self.assertEqual(winfile.basename, basename)
+
+            fc = FileCollection.from_path_except(
+                "testdir", ignore_ext=[".jpg"])
+            expect = ["root_file.txt", "sub_file.txt"]
+            for winfile, basename in zip(fc.iterfiles(), expect):
+                self.assertEqual(winfile.basename, basename)
+
+            fc = FileCollection.from_path_except(
+                "testdir", ignore_pattern=["image"])
+            expect = ["root_file.txt", "sub_file.txt"]
+            for winfile, basename in zip(fc.iterfiles(), expect):
+                self.assertEqual(winfile.basename, basename)
+
+        def test_from_path_by_pattern(self):
+            """测试from_path_by_pattern方法是否能正常工作。
+            """
+            fc = FileCollection.from_path_by_pattern(
+                "testdir", pattern=["sub"])
+            expect = ["sub_file.txt", "sub_image.jpg"]
+            for winfile, basename in zip(fc.iterfiles(), expect):
+                self.assertEqual(winfile.basename, basename)
+
+        def test_from_path_by_size(self):
+            """测试from_from_path_by_size方法是否能正常工作。
+            """
+            fc = FileCollection.from_path_by_size("testdir", min_size=1024)
+            expect = ["root_image.jpg", "sub_image.jpg"]
+            for winfile, basename in zip(fc.iterfiles(), expect):
+                self.assertEqual(winfile.basename, basename)
+                
+            fc = FileCollection.from_path_by_size("testdir", max_size=1024)
+            expect = ["root_file.txt", "sub_file.txt"]
+            for winfile, basename in zip(fc.iterfiles(), expect):
+                self.assertEqual(winfile.basename, basename)    
+
+        def test_from_path_by_ext(self):
+            """测试from_path_by_ext方法是否能正常工作。
+            """
+            fc = FileCollection.from_path_by_ext("testdir", ext=".jpg")
+            expect = ["root_image.jpg", "sub_image.jpg"]
+            for winfile, basename in zip(fc.iterfiles(), expect):
+                self.assertEqual(winfile.basename, basename)
+                
+            fc = FileCollection.from_path_by_ext("testdir", ext=[".txt"])
+            expect = ["root_file.txt", "sub_file.txt"]
+            for winfile, basename in zip(fc.iterfiles(), expect):
+                self.assertEqual(winfile.basename, basename)    
+
+        def test_from_path_by_md5(self):
+            WinFile.set_initialize_mode(complexity=3)
+            winfile = WinFile("winzip.py")
+            WinFile.set_initialize_mode(complexity=2)
+                        
+            res = FileCollection.from_path_by_md5(
+                winfile.md5, r"C:\Python33\Lib\site-packages\angora")
+            self.assertEqual(res[0].basename, "winzip.py")
+
         def test_add_and_remove(self):
             """测试添加WinFile和删除WinFile的方法是否正常工作。
             """
@@ -1162,9 +1438,13 @@ if __name__ == "__main__":
             fc2 = FileCollection.from_path(self._dir)
             fc3 = FileCollection()
             fc3.add("filesystem.py")
+            
             fc = fc1 + fc2 + fc3
             self.assertEqual(fc.howmany, 5)
             
+            fc = FileCollection.sum([fc1, fc2, fc3])
+            self.assertEqual(fc.howmany, 5)
+
         def test_sub(self):
             """测试两个集合相减是否正常工作。
             """
@@ -1178,22 +1458,10 @@ if __name__ == "__main__":
 #             dst = r"C:\Users\shu\Documents\PythonWorkSpace\py3\py33_projects\filesystem-project\filemonkey\lib\filesystem\mirror"
 #             FileCollection.create_fake_mirror(src, dst)
  
-        def test_print_big_file(self):
-            fc = FileCollection.from_path(self._dir)
-            fc.print_big_file(1000)
-             
-        def test_print_filename_contains_pattern(self):
-            fc = FileCollection.from_path(self._dir)
-            fc.print_filename_contains_pattern("image")
-            
-        def test_find_matched_file_by_md5(self):
-            WinFile.set_initialize_mode(complexity=3)
-            winfile = WinFile("winzip.py")
-            
-            res = FileCollection.find_matched_file_by_md5(
-                winfile.md5, r"C:\Python33\Lib\site-packages\angora")
-            self.assertEqual(res[0].basename, "winzip.py")
+        def test_show_big_file(self):
+            FileCollection.show_big_file(self._dir, 1000)
 
-            WinFile.set_initialize_mode(complexity=2)
+        def test_show_patterned_file(self):
+            FileCollection.show_patterned_file(self._dir, ["image",])
             
     unittest.main()
