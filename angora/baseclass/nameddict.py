@@ -19,7 +19,7 @@ class Base(object):
      
     def __repr__(self):
         kwargs = list()
-        for attr, value in self.__dict__.items():
+        for attr, value in self.items():
             kwargs.append("%s=%r" % (attr, value))
         return "%s(%s)" % (self.__class__.__name__, ", ".join(kwargs))
     
@@ -28,13 +28,13 @@ class Base(object):
         return cls(**d)
     
     def keys(self):
-        return self.__dict__.keys()
+        return [key for key, value in self.items()]
     
     def values(self):
-        return self.__dict__.values()
+        return [value for key, value in self.items()]
     
     def items(self):
-        return self.__dict__.items()
+        return sorted(self.__dict__.items(), key=lambda x: x[0])
     
     def to_dict(self):
         return self.__dict__
@@ -43,17 +43,18 @@ if __name__ == "__main__":
     import unittest
     
     class Person(Base):
-        def __init__(self, name):
+        def __init__(self, id, name):
+            self.id = id
             self.name = name
     
     class Unittest(unittest.TestCase):
         def test_all(self):
-            person = Person(name="Jack")
-            self.assertEqual(str(person), "Person(name='Jack')")
-            self.assertDictEqual(person.to_dict(), {"name": "Jack"})
+            person = Person(id=1, name="Jack")
+            self.assertEqual(str(person), "Person(id=1, name='Jack')")
+            self.assertDictEqual(person.to_dict(), {"id": 1, "name": "Jack"})
 
-            person = Person._make({"name": "Jack"})
-            self.assertEqual(str(person), "Person(name='Jack')")
-            self.assertDictEqual(person.to_dict(), {"name": "Jack"})
+            person = Person._make({"id": 1, "name": "Jack"})
+            self.assertEqual(str(person), "Person(id=1, name='Jack')")
+            self.assertDictEqual(person.to_dict(), {"id": 1, "name": "Jack"})
             
     unittest.main()

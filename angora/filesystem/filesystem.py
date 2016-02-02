@@ -1192,12 +1192,21 @@ class FileCollection(object):
 
     
 class FileFilter(object):
-    """filter function container class.
+    """File filter container class.
     """
     @staticmethod
     def image(winfile):
         if winfile.ext in [".jpg", ".jpeg", ".png", ".gif", ".tiff",
                            ".bmp", ".ppm", ".pgm", ".pbm", ".pnm", ".svg"]:
+            return True
+        else:
+            return False
+    
+    @staticmethod
+    def audio(winfile):
+        if winfile.ext in [".mp3", ".mp4", ".aac", ".m4a", ".wma", 
+                           ".wav", ".ape", ".tak", ".tta", 
+                           ".3gp", ".webm", ".ogg" ]:
             return True
         else:
             return False

@@ -9,11 +9,11 @@ import sys
 
 if sys.version_info[0] == 3:
     _str_type = str
-    _int_types = (int,)
+    _int_type = (int,)
     PK_PROTOCOL = 3
     is_py3 = True
 else:
     _str_type = basestring
-    _int_types = (int, long)
+    _int_type = (int, long)
     PK_PROTOCOL = 2
     is_py3 = False

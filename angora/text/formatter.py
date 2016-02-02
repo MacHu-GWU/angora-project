@@ -96,6 +96,20 @@ def fmt_name(text):
         chunks = [chunk[0].upper() + chunk[1:] for chunk in text.split(" ") if len(chunk) >= 1]
         return " ".join(chunks)
 
+def fmt_filename(text):
+    """File name formatter.
+    
+    Remove all file system forbidden char from text.
+    
+    **中文文档**
+    
+    移除文件系统中不允许的字符。 
+    """
+    forbidden_char = ["\\", "/", ":", "*", "?", "|", "<", ">", '"']
+    for char in forbidden_char:
+        text = text.replace(char, "")
+    return text
+
 #-----------------------------------------------------------------------------#
 #                                  Unittest                                   #
 #-----------------------------------------------------------------------------#
