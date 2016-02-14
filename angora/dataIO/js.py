@@ -45,15 +45,29 @@ Class, method, function, exception
 """
 
 from __future__ import print_function, unicode_literals
+
+import os
+import gzip
+import shutil
+import time
+
 try:
     from bson import json_util as json
 except ImportError:
     print("[Failed to do 'from bson import json_util as json', pleasee install "
           "'pymongo' to activate datetime encoding support]: %s" % e)
     import json
-import gzip
-import os, shutil
-import time
+from json import encoder
+
+try:
+    from ..gadget.messenger import Messenger
+except:
+    from angora.gadget.messenger import Messenger
+
+
+def set_precision(n):
+    encoder.FLOAT_REPR = lambda x: format(x, ".%sf" % n)
+
 
 def load_js(abspath, default=dict(), compress=False, enable_verbose=True):
     """Load Json from file. If file are not exists, returns ``default``.
@@ -98,37 +112,41 @@ def load_js(abspath, default=dict(), compress=False, enable_verbose=True):
     :param enable_verbose: (默认 True) 是否打开信息提示开关, 批处理时建议关闭.
     :type enable_verbose: ``布尔值``
     """
-    abspath = str(abspath) # try stringlize
+    abspath = str(abspath)  # try stringlize
 
-    if compress: # check extension name
+    msg = Messenger(enable_verbose=enable_verbose)
+
+    if compress:  # check extension name
         if os.path.splitext(abspath)[1] != ".gz":
             raise Exception("compressed json has to use extension '.gz'!")
     else:
         if os.path.splitext(abspath)[1] != ".json":
             raise Exception("file extension are not '.json'!")
 
-    if enable_verbose:
-        print("\nLoading from %s..." % abspath)
-        st = time.clock()
+    msg.show("\nLoading from %s..." % abspath)
+    st = time.clock()
 
-    if os.path.exists(abspath): # exists, then load
+    if os.path.exists(abspath):  # exists, then load
         if compress:
             with gzip.open(abspath, "rb") as f:
                 js = json.loads(f.read().decode("utf-8"))
         else:
             with open(abspath, "rb") as f:
                 js = json.loads(f.read().decode("utf-8"))
-        if enable_verbose:
-            print("\tComplete! Elapse %.6f sec." % (time.clock() - st) )
+
+        msg.show("    Complete! Elapse %.6f sec." % (time.clock() - st))
         return js
 
     else:
-        if enable_verbose:
-            print("\t%s not exists! cannot load! Create an default object "
-                  "instead" % abspath)
-        return default
+        if default is None:
+            raise FileNotFoundError(abspath)
+        else:
+            msg.show("    %s not exists! cannot load! "
+                     "Create an default object instead" % abspath)
+            return default
 
-def dump_js(js, abspath,
+
+def dump_js(js, abspath, precision=None,
             fastmode=False, replace=False, compress=False, enable_verbose=True):
     """Dump Json serializable object to file.
     Provides multiple choice to customize the behavior.
@@ -195,9 +213,14 @@ def dump_js(js, abspath,
     :param enable_verbose: (默认 True) 是否打开信息提示开关, 批处理时建议关闭.
     :type enable_verbose: "布尔值"
     """
-    abspath = str(abspath) # try stringlize
+    abspath = str(abspath)  # try stringlize
 
-    if compress: # check extension name
+    if precision is not None:
+        encoder.FLOAT_REPR = lambda x: format(x, ".%sf" % precision)
+    
+    msg = Messenger(enable_verbose=enable_verbose)
+
+    if compress:  # check extension name
         root, ext = os.path.splitext(abspath)
         if ext != ".gz":
             if ext != ".tmp":
@@ -205,7 +228,8 @@ def dump_js(js, abspath,
             else:
                 _, ext = os.path.splitext(root)
                 if ext != ".gz":
-                    raise Exception("compressed json has to use extension '.gz'!")
+                    raise Exception(
+                        "compressed json has to use extension '.gz'!")
     else:
         root, ext = os.path.splitext(abspath)
         if ext != ".json":
@@ -216,13 +240,12 @@ def dump_js(js, abspath,
                 if ext != ".json":
                     raise Exception("file extension are not '.json'!")
 
-    if enable_verbose:
-        print("\nDumping to %s..." % abspath)
-        st = time.clock()
+    msg.show("\nDumping to %s..." % abspath)
+    st = time.clock()
 
-    if os.path.exists(abspath): # if exists, check replace option
-        if replace: # replace existing file
-            if fastmode: # no sort and indent, do the fastest dumping
+    if os.path.exists(abspath):  # if exists, check replace option
+        if replace:  # replace existing file
+            if fastmode:  # no sort and indent, do the fastest dumping
                 if compress:
                     with gzip.open(abspath, "wb") as f:
                         f.write(json.dumps(js).encode("utf-8"))
@@ -233,17 +256,17 @@ def dump_js(js, abspath,
                 if compress:
                     with gzip.open(abspath, "wb") as f:
                         f.write(json.dumps(js, sort_keys=True,
-                            indent=4, separators=("," , ": ")).encode("utf-8"))
+                                           indent=4, separators=(",", ": ")).encode("utf-8"))
                 else:
                     with open(abspath, "wb") as f:
                         f.write(json.dumps(js, f, sort_keys=True,
-                            indent=4, separators=("," , ": ") ).encode("utf-8"))
-        else: # stop, print error message
+                                           indent=4, separators=(",", ": ")).encode("utf-8"))
+        else:  # stop, print error message
             raise Exception("\tCANNOT WRITE to %s, it's already "
                             "exists" % abspath)
 
-    else: # if not exists, just write to it
-        if fastmode: # no sort and indent, do the fastest dumping
+    else:  # if not exists, just write to it
+        if fastmode:  # no sort and indent, do the fastest dumping
             if compress:
                 with gzip.open(abspath, "wb") as f:
                     f.write(json.dumps(js).encode("utf-8"))
@@ -254,25 +277,25 @@ def dump_js(js, abspath,
             if compress:
                 with gzip.open(abspath, "wb") as f:
                     f.write(json.dumps(js, sort_keys=True,
-                        indent=4, separators=("," , ": ")).encode("utf-8"))
+                                       indent=4, separators=(",", ": ")).encode("utf-8"))
             else:
                 with open(abspath, "wb") as f:
                     f.write(json.dumps(js, sort_keys=True,
-                        indent=4, separators=("," , ": ")).encode("utf-8"))
-            
-    if enable_verbose:
-        print("\tComplete! Elapse %.6f sec" % (time.clock() - st) )
+                                       indent=4, separators=(",", ": ")).encode("utf-8"))
 
-def safe_dump_js(js, abspath, 
+    msg.show("    Complete! Elapse %.6f sec" % (time.clock() - st))
+
+
+def safe_dump_js(js, abspath, precision=None,
                  fastmode=False, compress=False, enable_verbose=True):
     """A stable version of dump_js, silently overwrite existing file.
 
     When your program been interrupted, you lose nothing. Typically if your
     program is interrupted by any reason, it only leaves a incomplete file.
     If you use replace=True, then you also lose your old file.
-    
+
     So a bettr way is to:
-    
+
     1. dump json to a temp file.
     2. when it's done, rename it to #abspath, overwrite the old one.
 
@@ -280,20 +303,20 @@ def safe_dump_js(js, abspath,
 
     :param js: Serializable python object.
     :type js: dict or list
-    
+
     :param abspath: ``save as`` path, file extension has to be ``.json`` or ``.gz`` 
         (for compressed json).
     :type abspath: string
-    
+
     :param fastmode: (default False) If ``True``, then dumping json without 
         sorted keys and pretty indent, and it's faster and smaller in size.
     :type fastmode: boolean
-    
+
     :param compress: (default False) If ``True``, use GNU program gzip to 
         compress the json file. Disk usage can be greatly reduced. But you have 
         to use :func:`load_js(abspath, compress=True)<load_js>` in loading.
     :type compress: boolean
-    
+
     :param enable_verbose: (default True) Trigger for message.
     :type enable_verbose: boolean
 
@@ -317,29 +340,30 @@ def safe_dump_js(js, abspath,
 
     :param js: 可Json化的Python对象
     :type js: ``字典`` 或 ``列表``
-    
+
     :param abspath: 写入文件的路径。扩展名必须为 ``.json`` 或 ``.gz``, 其中gz用于被压
         缩的Json
     :type abspath: ``字符串``
-    
+
     :param replace: (默认 False) 当为``True``时, 如果写入路径已经存在, 则会自动覆盖
         原文件。而为``False``时, 则会抛出异常。防止误操作覆盖源文件。
     :type replace: ``布尔值``
-    
+
     :param compress: (默认 False) 当为``True``时, 使用开源压缩标准gzip压缩Json文件。
         通常能让文件大小缩小10-20倍不等。如要读取文件, 则需要使用函数
         :func:`load_js(abspath, compress=True)<load_js>`.
     :type compress: ``布尔值``
-    
+
     :param enable_verbose: (默认 True) 是否打开信息提示开关, 批处理时建议关闭.
     :type enable_verbose: ``布尔值``
     """
-    abspath = str(abspath) # try stringlize
+    abspath = str(abspath)  # try stringlize
     temp_abspath = "%s.tmp" % abspath
-    dump_js(js, temp_abspath, fastmode=fastmode, 
+    dump_js(js, temp_abspath, precision=precision, fastmode=fastmode,
             replace=True, compress=compress, enable_verbose=enable_verbose)
     shutil.move(temp_abspath, abspath)
-    
+
+
 def js2str(js, sort_keys=True, indent=4):
     """Encode js to nicely formatted human readable string. (utf-8 encoding)
 
@@ -357,8 +381,9 @@ def js2str(js, sort_keys=True, indent=4):
 
     将可Json化的Python对象转化成格式化的字符串。
     """
-    return json.dumps(js, sort_keys=sort_keys, 
-                      indent=indent, separators=("," , ": "))
+    return json.dumps(js, sort_keys=sort_keys,
+                      indent=indent, separators=(",", ": "))
+
 
 def prt_js(js, sort_keys=True, indent=4):
     """Print Json in pretty format.
@@ -378,30 +403,31 @@ def prt_js(js, sort_keys=True, indent=4):
 
     以人类可读的方式打印可Json化的Python对象。
     """
-    print(js2str(js, sort_keys, indent) )
-    
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
+    print(js2str(js, sort_keys, indent))
 
+
+#--- Unittest ---
 if __name__ == "__main__":
+    from datetime import datetime, timedelta
     import unittest
 
     class JSUnittest(unittest.TestCase):
         def test_write_and_read(self):
-            data = {"a": [1, 2], "b": ["是", "否"]}
-            safe_dump_js(data, "data.json")
+            data = {"a": [1, 2], "b": ["是", "否"],
+                    "c": datetime(2015, 1, 1, 6, 30), "d": [0.123456789, 3.1415926535]}
+            safe_dump_js(data, "data.json", precision=2, enable_verbose=False)
             data = load_js("data.json")
             self.assertEqual(data["a"][0], 1)
             self.assertEqual(data["b"][0], "是")
+            self.assertAlmostEqual(data["d"][0], 0.12, delta=0.000000001)
+            self.assertAlmostEqual(data["d"][1], 3.14, delta=0.000000001)
 
         def test_js2str(self):
             data = {"a": [1, 2], "b": ["是", "否"]}
             prt_js(data)
 
         def test_compress(self):
-            data = {"a": list(range(32)),
-                    "b": list(range(32)),}
+            data = {"a": [1, 2], "b": ["是", "否"]}
             safe_dump_js(data, "data.gz", compress=True)
             prt_js(load_js("data.gz", compress=True))
 

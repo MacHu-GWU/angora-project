@@ -61,6 +61,8 @@ if __name__ == "__main__":
             person = Person._make({"id": 1, "name": "Jack"})
             self.assertEqual(str(person), "Person(id=1, name='Jack')")
             self.assertDictEqual(person.to_dict(), {"id": 1, "name": "Jack"})
-
+            
+            print(person.keys())
+            print(person.values())
 
     unittest.main()

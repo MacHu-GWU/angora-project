@@ -369,6 +369,7 @@ class TimeWrapper(object):
         """
         day, hour, min, sec,
         """
+        freq = freq.lower().strip()
         try:
             if "day" in freq:
                 freq = freq.replace("day", "")
@@ -379,8 +380,8 @@ class TimeWrapper(object):
             elif "min" in freq:
                 freq = freq.replace("min", "")
                 return timedelta(minutes=int(freq))
-            elif "seconds" in freq:
-                freq = freq.replace("seconds", "")
+            elif "sec" in freq:
+                freq = freq.replace("sec", "")
                 return timedelta(seconds=int(freq))
             else:
                 raise Exception("%s is invalid format. use day, hour, min, sec." % freq)

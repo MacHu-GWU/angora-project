@@ -41,6 +41,22 @@ class Base(nameddict.Base):
         else:
             return object.__getattribute__(self, attr)
 
+    def keys(self):
+        return [key for key, value in self.items()]
+
+    def values(self):
+        return [value for key, value in self.items()]
+
+    def items(self):
+        items = list()
+        for attr, value in self.__dict__.items():
+            if "____" not in attr:
+                items.append((attr, value))
+        return sorted(items, key=lambda x: x[0])
+
+    def to_dict(self):
+        return self.__dict__
+
     def serialize(self):
         d = {"classname": self.__class__.__name__, "metadata": dict()}
         uuid_set = set()

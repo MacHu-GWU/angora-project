@@ -32,11 +32,12 @@ Class, method, function, exception
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 """
 
-from __future__ import unicode_literals
+from __future__ import print_function, unicode_literals
 try: # ResConstructor.table method requires 'prettytable' extension.
     from prettytable import PrettyTable
 except ImportError:
-    pass
+    print("[Failed to do 'from prettytable import PrettyTable', "
+          "please install prettytable]: %s" % e)
 
 class RstConstructor(object):
     """reConstructed Text snippet constructor.
