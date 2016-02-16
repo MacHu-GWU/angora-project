@@ -4,4 +4,5 @@
 """
 """
 
-from .rst import rst_constructor as rst
+from .rst import rst_constructor
+from .html import html_constructor

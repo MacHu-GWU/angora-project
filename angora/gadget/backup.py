@@ -71,9 +71,10 @@ try:
 except:
     from angora.filesystem import *
 
+
 def run_backup(filename, root_dir, ignore=[], ignore_ext=[], ignore_pattern=[]):
     """The backup utility method.
-    
+
     :param root_dir: the directory you want to backup
     :param ignore: file or directory defined in this list will be ignored.
     :param ignore_ext: file with extensions defined in this list will be ignored.
@@ -84,26 +85,26 @@ def run_backup(filename, root_dir, ignore=[], ignore_ext=[], ignore_pattern=[]):
     # Step 1, calculate files to backup
     print("Perform backup '%s'..." % root_dir)
     print(tab + "1. Calculate files...")
-    
+
     total_size_in_bytes = 0
-    
+
     init_mode = WinFile.init_mode
     WinFile.use_regular_init()
     fc = FileCollection.from_path_except(
         root_dir, ignore, ignore_ext, ignore_pattern)
     WinFile.set_initialize_mode(complexity=init_mode)
-    
+
     for winfile in fc.iterfiles():
         total_size_in_bytes += winfile.size_on_disk
-    
+
     # Step 2, write files to zip archive
     print(tab * 2 + "Done, got %s files, total size is %s." % (
         len(fc), string_SizeInBytes(total_size_in_bytes)))
     print(tab + "2. Backup files...")
-    
+
     filename = "%s %s.zip" % (
         filename, datetime.now().strftime("%Y-%m-%d %Hh-%Mm-%Ss"))
-    
+
     print(tab * 2 + "Write to '%s'..." % filename)
     current_dir = os.getcwd()
     with ZipFile(filename, "w") as f:
@@ -112,21 +113,21 @@ def run_backup(filename, root_dir, ignore=[], ignore_ext=[], ignore_pattern=[]):
             relpath = os.path.relpath(winfile.abspath, root_dir)
             f.write(relpath)
     os.chdir(current_dir)
-    
+
     print(tab + "Complete!")
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
+
+#--- Unittest ---
 if __name__ == "__main__":
     import site
-    
+
     def test():
         root_dir = os.path.join(site.getsitepackages()[1], "angora")
         ignore = ["zzz_manual_install.py"]
         ignore_ext = [".pyc"]
         ignore_pattern = ["__init__"]
         backup_filename = "angora-backup"
-        run_backup(backup_filename, root_dir, ignore, ignore_ext, ignore_pattern)
-            
+        run_backup(
+            backup_filename, root_dir, ignore, ignore_ext, ignore_pattern)
+
     test()

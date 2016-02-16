@@ -2,16 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Copyright (c) 2015 by Sanhe Hu
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- Author: Sanhe Hu
-- Email: husanhe@gmail.com
-- Lisence: MIT
-
-
 Module description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-A tool can programmatically generate Html Text snippet.
+A tool can programmatically generate Html Text snippet for single page
+application html templates.
 
 ref: http://www.w3schools.com/tags/tag_input.asp
 
@@ -116,6 +110,8 @@ class HtmlConstructor(object):
     
 html_constructor = HtmlConstructor()
 
+
+#--- Unittest ---
 if __name__ == "__main__":
     print(html_constructor.input_text("text"))
     print(html_constructor.input_number("number"))

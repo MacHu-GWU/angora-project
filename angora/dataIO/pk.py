@@ -8,19 +8,19 @@ Module description
 This module is re-pack of some pickle utility functions.
 
 - :func:`load_pk`: Load Python Object from Pickle file.
-            
+
 - :func:`dump_pk`: Dump Picklable Python Object to file.
-        
-- :func:`safe_dump_pk`: An atomic write version of dump_pk, silently overwrite 
+
+- :func:`safe_dump_pk`: An atomic write version of dump_pk, silently overwrite
   existing file.
 
 - :func:`obj2bytestr`: Convert arbitrary pickable Python Object to bytestr.
 
 - :func:`bytestr2obj`: Parse Python object from bytestr.
 
-- :func:`obj2str`: convert arbitrary object to database friendly string, using 
+- :func:`obj2str`: convert arbitrary object to database friendly string, using
   base64encode algorithm.
-            
+
 - :func:`str2obj`: Parse object from base64 encoded string.
 
 
@@ -73,7 +73,7 @@ except:
 def load_pk(abspath, compress=False, enable_verbose=True):
     """Load Python Object from Pickle file.
 
-    :param abspath: File path. Use absolute path as much as you can. File 
+    :param abspath: File path. Use absolute path as much as you can. File
         extension has to be ``.pickle`` or ``.gz``. (for compressed Pickle)
     :type abspath: string
 
@@ -143,21 +143,21 @@ def dump_pk(obj, abspath,
 
     :param obj: Picklable Python Object.
 
-    :param abspath: ``save as`` path, file extension has to be ``.pickle`` or 
+    :param abspath: ``save as`` path, file extension has to be ``.pickle`` or
         ``.gz`` (for compressed Pickle).
     :type abspath: string
 
-    :param pk_protocol: (default your python version) use 2, to make a 
+    :param pk_protocol: (default your python version) use 2, to make a
         py2.x/3.x compatible pickle file. But 3 is faster.
     :type pk_protocol: int
 
-    :param replace: (default False) If ``True``, when you dump Pickle to a 
-        existing path, it silently overwrite it. If False, an exception will be 
+    :param replace: (default False) If ``True``, when you dump Pickle to a
+        existing path, it silently overwrite it. If False, an exception will be
         raised. Default False setting is to prevent overwrite file by mistake.
     :type replace: boolean
 
-    :param compress: (default False) If ``True``, use GNU program gzip to 
-        compress the Pickle file. Disk usage can be greatly reduced. But you 
+    :param compress: (default False) If ``True``, use GNU program gzip to
+        compress the Pickle file. Disk usage can be greatly reduced. But you
         have to use :func:`load_pk(abspath, compress=True)<load_pk>` in loading.
     :type compress: boolean
 
@@ -267,16 +267,16 @@ def safe_dump_pk(obj, abspath, pk_protocol=pk_protocol, compress=False,
 
     :param obj: Picklable Python Object.
 
-    :param abspath: ``save as`` path, file extension has to be ``.pickle`` or 
+    :param abspath: ``save as`` path, file extension has to be ``.pickle`` or
         ``.gz`` (for compressed Pickle).
     :type abspath: string
 
-    :param pk_protocol: (default your python version) use 2, to make a 
+    :param pk_protocol: (default your python version) use 2, to make a
         py2.x/3.x compatible pickle file. But 3 is faster.
     :type pk_protocol: int
 
-    :param compress: (default False) If ``True``, use GNU program gzip to 
-        compress the Pickle file. Disk usage can be greatly reduced. But you 
+    :param compress: (default False) If ``True``, use GNU program gzip to
+        compress the Pickle file. Disk usage can be greatly reduced. But you
         have to use :func:`load_pk(abspath, compress=True)<load_pk>` in loading.
     :type compress: boolean
 
@@ -295,7 +295,7 @@ def safe_dump_pk(obj, abspath, pk_protocol=pk_protocol, compress=False,
 
     在对文件进行写入时, 如果程序中断, 则会留下一个不完整的文件。如果你使用了覆盖式
     写入, 则你同时也丢失了原文件。所以为了保证写操作的原子性(要么全部完成, 要么全部
-    都不完成), 更好的方法是: 首先将文件写入一个临时文件中, 完成后再讲文件重命名, 
+    都不完成), 更好的方法是: 首先将文件写入一个临时文件中, 完成后再讲文件重命名,
     覆盖旧文件。这样即使中途程序被中断, 也仅仅是留下了一个未完成的临时文件而已, 不会
     影响原文件。
 
@@ -390,14 +390,12 @@ def str2obj(textstr):
 
     **中文文档**
 
-    从"字符串"中恢复Python对象 
+    从"字符串"中恢复Python对象
     """
     return pickle.loads(base64.b64decode(textstr.encode("utf-8")))
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
 
+#--- Unittest ---
 if __name__ == "__main__":
     import unittest
     import sqlite3
@@ -420,7 +418,7 @@ if __name__ == "__main__":
             库。而在python3中, 可以直接将pickle.dumps的bytestr存入数据库, 这样
             就省去了base64编码的开销。
 
-            注: 在python2中也有通过设定 connect.text_factory 的方法解决该问题, 
+            注: 在python2中也有通过设定 connect.text_factory 的方法解决该问题,
             具体内容请google
 
             This test will not pass in Python2, because sqlite python2 API

@@ -101,10 +101,8 @@ class StrTemplate():
         print(StrTemplate.box(text=text, width=width, height=height,
             corner=corner, horizontal=horizontal, vertical=vertical))
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
 
+#--- Unittest ---
 if __name__ == "__main__":
     import unittest
     

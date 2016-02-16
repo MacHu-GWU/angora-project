@@ -297,10 +297,8 @@ def visualize(x, y, xlabel=None, ylabel=None, title=None, ylim=None):
     elif total_seconds <= 86400 * 365 * 1.5:
         return plot_one_year(x, y, xlabel, ylabel, title, ylim)
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
 
+#--- Unittest ---
 if __name__ == "__main__":
     import pandas as pd, numpy as np
     

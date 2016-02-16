@@ -799,15 +799,11 @@ class TimeWrapper(object):
                 return timewrapper.add_days(new_datetime, 1)
         else:
             raise ValueError("'mode' has to be lower or upper!")
-            
-        
         
 timewrapper = TimeWrapper()
 
-############
-# Unittest #
-############
 
+#--- Unittest ---
 if __name__ == "__main__":
     import unittest
     import sys

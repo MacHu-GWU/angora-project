@@ -792,7 +792,8 @@ class FileCollection(object):
           
         **中文文档**
         
-        选择dir_path下的所有文件, 在ignore中被排除的文件除外。
+        选择dir_path下的所有文件, 在ignore, ignore_ext, ignore_pattern中所定义
+        的文件将被排除在外。
         """
         ignore = [i.lower() for i in ignore]
         ignore_ext = [i.lower() for i in ignore_ext]
@@ -1122,7 +1123,7 @@ class FileCollection(object):
     
     @staticmethod
     def show_patterned_file(dir_path, pattern=list(), filename_only=True):
-        """Print all file that file name contains ``pattern``
+        """Print all file that file name contains ``pattern``.
         """
         pattern = [i.lower() for i in pattern]
         if filename_only:
@@ -1168,7 +1169,12 @@ class FileCollection(object):
         
         A recipe gadget to create some test data set.
         
-        Make sure using absolute path Please.
+        Make sure to use absolute path.
+        
+        **中文文档**
+        
+        复制整个src目录下的文件树结构到dst目录。但实际上并不复制内容, 只复制
+        文件名。即, 全是空文件, 但目录结构一致。
         """
         src = os.path.abspath(src)
         if not (os.path.exists(src) and (not os.path.exists(dst)) ):
@@ -1206,7 +1212,7 @@ class FileFilter(object):
     def audio(winfile):
         if winfile.ext in [".mp3", ".mp4", ".aac", ".m4a", ".wma", 
                            ".wav", ".ape", ".tak", ".tta", 
-                           ".3gp", ".webm", ".ogg" ]:
+                           ".3gp", ".webm", ".ogg",]:
             return True
         else:
             return False
@@ -1215,7 +1221,7 @@ class FileFilter(object):
     def video(winfile):
         if winfile.ext in [".avi", ".wmv", ".mkv", ".mp4", ".flv", 
                 ".vob", ".mov", ".rm", ".rmvb", "3gp", ".3g2", ".nsv", ".webm",
-                ".mpg", ".m4v", ".iso",]:
+                ".mpg", ".mpeg", ".m4v", ".iso",]:
             return True
         else:
             return False
@@ -1247,7 +1253,9 @@ class FileFilter(object):
             return True
         else:
             return False
-    
+
+
+#--- Unittest ---
 if __name__ == "__main__":
     import unittest
     

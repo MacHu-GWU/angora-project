@@ -202,10 +202,8 @@ class OrderedSet(collections.MutableSet):
             res = ods & res
         return res
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
 
+#--- Unittest ---
 if __name__ == "__main__":
     import unittest
 

@@ -1,5 +1,5 @@
 Welcome to the angora Documentation
-===================================================================================================
+===================================
 
 ``angora`` is my personal data science python development library collection.
 
@@ -16,7 +16,7 @@ Welcome to the angora Documentation
 .. _install:
 
 Install
----------------------------------------------------------------------------------------------------
+-------
 ``angora`` is released on PyPI, so all you need is:
 
 .. code-block:: console

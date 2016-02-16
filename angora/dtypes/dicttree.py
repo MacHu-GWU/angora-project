@@ -395,10 +395,8 @@ class DictTree(object):
         print("On depth %s, having %s root nodes, %s leaf nodes. "
               "%s nodes in total." % (depth, root_nodes, leaf_nodes, total))
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
 
+#--- Unittest ---
 if __name__ == "__main__":
     from pprint import pprint as ppt
     import unittest

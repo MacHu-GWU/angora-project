@@ -120,10 +120,8 @@ def rand_article(num_p=(4, 10), num_s=(2, 15), num_w=(5, 40)):
         article.append(". ".join(p))
     return "\n\n".join(article)
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
 
+#--- Unittest ---
 if __name__ == "__main__":
     print(rand_str(string.ascii_letters + string.digits, 32))
     print(rand_pwd(12))

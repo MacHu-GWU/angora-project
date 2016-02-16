@@ -53,7 +53,7 @@ import time
 
 try:
     from bson import json_util as json
-except ImportError:
+except ImportError as e:
     print("[Failed to do 'from bson import json_util as json', pleasee install "
           "'pymongo' to activate datetime encoding support]: %s" % e)
     import json

@@ -80,6 +80,8 @@ def try_ntimes(_howmany, func, *argv, **kwarg):
             counter += 1
     raise current_exception
 
+
+#--- Unittest ---
 if __name__ == "__main__":
     import random
 

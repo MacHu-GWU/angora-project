@@ -65,10 +65,8 @@ def write(text, path):
     with open(path, "wb") as f:
         f.write(text.encode("utf-8"))
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
 
+#--- Unittest ---
 if __name__ == "__main__":
     import unittest
     import os

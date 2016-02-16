@@ -24,8 +24,9 @@ iterable into memory all at once.
 - :func:`cycle_running_windows`: Generate n-size cycle running windows.
 - :func:`cycle_slice`: Given a list, return right hand cycle direction slice
   from start to end.
-- :func:`shift_to_the_left`: shift array to the left.
-- :func:`shift_to_the_right`: shift array to the right.
+- :func:`cycle_dist`: Find distance between x, y by means of a n-length cycle.
+- :func:`shift_to_the_left`: Shift array to the left.
+- :func:`shift_to_the_right`: Shift array to the right.
 - :func:`count_generator`: Count number of item in generator.
 
 
@@ -255,7 +256,7 @@ def cycle_slice(sliceable, start, end):
 
 
 def cycle_dist(x, y, n):
-    """Distance between x, y by means of a n-length cycle.
+    """Find Distance between x, y by means of a n-length cycle.
 
     Example:
 
@@ -271,7 +272,7 @@ def cycle_dist(x, y, n):
 
 
 def shift_to_the_left(array, dist, pad=True, trim=True):
-    """shift array to the left.
+    """Shift array to the left.
 
     :param array: An iterable object.
     :type array: iterable object
@@ -316,7 +317,7 @@ def shift_to_the_left(array, dist, pad=True, trim=True):
 
 
 def shift_to_the_right(array, dist, pad=True, trim=True):
-    """shift array to the right.
+    """Shift array to the right.
 
     :param array: An iterable object.
     :type array: iterable object

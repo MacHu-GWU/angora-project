@@ -50,10 +50,8 @@ class ReParser(object):
         pattern = r"""(?<=%s)[\s\S]{1,%s}(?=%s)""" % (prefix, maxlen, surfix)
         return re.findall(pattern, text)
 
-#-----------------------------------------------------------------------------#
-#                                  Unittest                                   #
-#-----------------------------------------------------------------------------#
 
+#--- Unittest ---
 if __name__ == "__main__":
     import unittest
     

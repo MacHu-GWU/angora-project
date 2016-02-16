@@ -92,10 +92,8 @@ class Timer(object):
         print("average = %0.6f seconds, total = %0.6f seconds, repeat %s times." % (
                 elapse/howmany, elapse, howmany) )
 
-############
-# Unittest #
-############
 
+#--- Unittest ---
 if __name__ == "__main__":
     """unit test, usage example
     """

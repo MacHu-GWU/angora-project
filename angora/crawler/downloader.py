@@ -23,7 +23,7 @@ _default_iter_size = 1024 * 1024
 
 
 def string_SizeInBytes(size_in_bytes):
-    """Make ``size in bytes`` human readable. 
+    """Make ``size in bytes`` human readable.
     Doesn"t support size greater than 1000PB.
 
     Usage::
